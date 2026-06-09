@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Booking Page</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+  <section class="hero">
+    <div class="badge">Premium Booking Experience</div>
+    <h1>Book Your Appointment</h1>
+    <p>Choose your preferred date, time, service, and add-ons with a modern booking flow.</p>
+
+    <div class="stats">
+      <div class="stat">
+        <strong>24/7</strong>
+        <span>Online booking</span>
+      </div>
+      <div class="stat">
+        <strong>4.9★</strong>
+        <span>Customer rating</span>
+      </div>
+      <div class="stat">
+        <strong>10 min</strong>
+        <span>Quick confirmation</span>
+      </div>
+    </div>
+
+    <div class="preview">
+      Why choose us?
+      <div id="featureText">Fast, flexible, and secure scheduling.</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Appointment Details</h2>
+    <p>Fill out the form below to reserve your slot.</p>
+
+    <form id="bookingForm">
+      <div class="form-grid">
+        <div class="field">
+          <label for="name">Full Name</label>
+          <input id="name" type="text" placeholder="John Doe" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Email Address</label>
+          <input id="email" type="email" placeholder="john@example.com" required>
+        </div>
+
+        <div class="field">
+          <label for="phone">Phone Number</label>
+          <input id="phone" type="tel" placeholder="+1 555 000 0000" required>
+        </div>
+
+        <div class="field">
+          <label for="service">Service</label>
+          <select id="service" required>
+            <option value="">Select Service</option>
+            <option value="50">Consultation - $50</option>
+            <option value="75">Follow-up - $75</option>
+            <option value="120">Premium Session - $120</option>
+            <option value="150">Emergency Support - $150</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="date">Date</label>
+          <input id="date" type="date" required>
+        </div>
+
+        <div class="field">
+          <label for="time">Time Slot</label>
+          <select id="time" required>
+            <option value="">Select Time Slot</option>
+            <option>10:00 AM</option>
+            <option>12:00 PM</option>
+            <option>2:00 PM</option>
+            <option>4:00 PM</option>
+            <option>6:00 PM</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="payment">Payment Method</label>
+          <select id="payment" required>
+            <option value="">Select Payment Method</option>
+            <option>Card</option>
+            <option>Cash</option>
+            <option>UPI</option>
+            <option>PayPal</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="promo">Promo Code</label>
+          <input id="promo" type="text" placeholder="SAVE10">
+        </div>
+
+        <div class="field full">
+          <label>Add-ons</label>
+          <div class="addons">
+            <label><input type="checkbox" value="20" class="addon"> Priority Support (+$20)</label>
+            <label><input type="checkbox" value="15" class="addon"> Extra Session Notes (+$15)</label>
+            <label><input type="checkbox" value="30" class="addon"> Video Call Upgrade (+$30)</label>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label for="notes">Special Notes</label>
+          <textarea id="notes" placeholder="Add any extra details..."></textarea>
+        </div>
+      </div>
+
+      <div class="preview">
+        Booking Summary
+        <div id="summary">No booking selected yet.</div>
+        <div id="price">Total Price: $0</div>
+      </div>
+
+      <div class="actions">
+        <button type="submit">Confirm Booking</button>
+        <button type="reset" class="secondary">Reset</button>
+      </div>
+
+      <div id="toast" class="toast">Booking saved successfully!</div>
+    </form>
+  </section>
+</div>
+
+<script>
+  const form = document.getElementById('bookingForm');
+  const summary = document.getElementById('summary');
+  const price = document.getElementById('price');
+  const toast = document.getElementById('toast');
+  const dateInput = document.getElementById('date');
+  const featureText = document.getElementById('featureText');
+
+  const fields = ['name', 'service', 'date', 'time', 'payment', 'promo'];
+
+  const features = [
+    'Fast, flexible, and secure scheduling.',
+    'Choose add-ons and get instant price updates.',
+    'Promo codes can reduce your total automatically.',
+    'Payment options make booking easier for everyone.'
+  ];
+
+  let featureIndex = 0;
+  setInterval(() => {
+    featureIndex = (featureIndex + 1) % features.length;
+    featureText.textContent = features[featureIndex];
+  }, 2500);
+
+  function getBasePrice() {
+    return parseInt(document.getElementById('service').value || '0', 10);
+  }
+
+  function getAddonPrice() {
+    return [...document.querySelectorAll('.addon:checked')]
+      .reduce((sum, el) => sum + parseInt(el.value, 10), 0);
+  }
+
+  function getDiscount(total) {
+    const promo = document.getElementById('promo').value.trim().toUpperCase();
+    if (promo === 'SAVE10') return total * 0.1;
+    if (promo === 'SAVE20') return total * 0.2;
+    return 0;
+  }
+
+  function updateSummary() {
+    const name = document.getElementById('name').value || 'Guest';
+    const serviceText = document.getElementById('service').selectedOptions[0]?.textContent || 'Service';
+    const date = document.getElementById('date').value || 'Date';
+    const time = document.getElementById('time').value || 'Time';
+    summary.textContent = `${name} • ${serviceText} • ${date} • ${time}`;
+
+    const base = getBasePrice();
+    const addons = getAddonPrice();
+    const discount = getDiscount(base + addons);
+    const total = Math.max(0, base + addons - discount);
+
+    price.textContent = `Total Price: $${total.toFixed(2)}${discount > 0 ? ` (Discount: $${discount.toFixed(2)})` : ''}`;
+  }
+
+  function setMinDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    dateInput.min = `${yyyy}-${mm}-${dd}`;
+  }
+
+  fields.forEach(id => {
+    document.getElementById(id).addEventListener('input', updateSummary);
+    document.getElementById(id).addEventListener('change', updateSummary);
+  });
+
+  document.querySelectorAll('.addon').forEach(cb => {
+    cb.addEventListener('change', updateSummary);
+  });
+
+  dateInput.addEventListener('change', function () {
+    if (this.value && this.value < this.min) {
+      this.value = this.min;
+    }
+    updateSummary();
+  });
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    toast.classList.add('show');
+    updateSummary();
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  });
+
+  form.addEventListener('reset', function () {
+    setTimeout(() => {
+      summary.textContent = 'No booking selected yet.';
+      price.textContent = 'Total Price: $0';
+      toast.classList.remove('show');
+      updateSummary();
+    }, 0);
+  });
+
+  setMinDate();
+  updateSummary();
+</script>
+
+</body>
+</html>
